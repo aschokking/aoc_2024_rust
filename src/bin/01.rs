@@ -1,7 +1,7 @@
 advent_of_code::solution!(1);
 
-use itertools::Itertools;
 use counter::Counter;
+use itertools::Itertools;
 
 pub fn part_one(input: &str) -> Option<u64> {
     let (mut left, mut right) = parse_input(input);
@@ -27,18 +27,20 @@ pub fn part_two(input: &str) -> Option<u64> {
 
     // Make a counter for the right list with counts of occurences
     let right_counts = right.iter().collect::<Counter<_>>();
-    left.into_iter().fold(0, |acc, value| {
-        acc + value * right_counts[&value] as u64
-    }).into()
+    left.into_iter()
+        .fold(0, |acc, value| acc + value * right_counts[&value] as u64)
+        .into()
 }
 
 fn parse_input(input: &str) -> (Vec<u64>, Vec<u64>) {
-    input.lines().fold((vec![], vec![]), |(mut a, mut b), line| {
-        let (left, right) = line.split_whitespace().collect_tuple().unwrap();
-        a.push(left.parse().unwrap());
-        b.push(right.parse().unwrap());
-        (a, b)
-    })
+    input
+        .lines()
+        .fold((vec![], vec![]), |(mut a, mut b), line| {
+            let (left, right) = line.split_whitespace().collect_tuple().unwrap();
+            a.push(left.parse().unwrap());
+            b.push(right.parse().unwrap());
+            (a, b)
+        })
 }
 
 #[cfg(test)]
