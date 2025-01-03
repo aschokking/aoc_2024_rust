@@ -109,4 +109,31 @@ mod tests {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
         assert_eq!(result, Some(4));
     }
+
+    #[test]
+    fn test_part_two_valid_check() {
+        let line = vec![1, 2, 3, 4];
+        assert_eq!(part_two_valid_check(line.clone(), true), true);
+        assert_eq!(part_two_valid_check(line.clone(), false), false);
+
+        let line = vec![1, 1, 3, 4];
+        assert_eq!(part_two_valid_check(line.clone(), true), true);
+        assert_eq!(part_two_valid_check(line.clone(), false), false);
+
+        let line = vec![1, 2, 4, 4];
+        assert_eq!(part_two_valid_check(line.clone(), true), true);
+        assert_eq!(part_two_valid_check(line.clone(), false), false);
+
+        let line = vec![1, 4, 0, 5];
+        assert_eq!(part_two_valid_check(line.clone(), true), true);
+        assert_eq!(part_two_valid_check(line.clone(), false), false);
+
+        let line = vec![4, 3, 2, 1];
+        assert_eq!(part_two_valid_check(line.clone(), true), false);
+        assert_eq!(part_two_valid_check(line.clone(), false), true);
+
+        let line = vec![4, 3, 1, 1];
+        assert_eq!(part_two_valid_check(line.clone(), true), false);
+        assert_eq!(part_two_valid_check(line.clone(), false), true);
+    }
 }
