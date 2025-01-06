@@ -37,18 +37,14 @@ pub fn part_two(input: &str) -> Option<u64> {
     (lines
         .iter()
         .filter(|line| {
-            let valid = part_two_valid_check(line.to_vec(), true) || part_two_valid_check(line.to_vec(), false);
-            dbg!(line);
-            dbg!(valid);
-
+            let valid = part_two_valid_check(line.to_vec(), true, true) || part_two_valid_check(line.to_vec(), false, true);
             valid
         })
         .count() as u64)
         .into()
 }
 
-fn part_two_valid_check(line: Vec<u64>, ascending: bool) -> bool {
-    let mut dropped_index: Option<usize> = None;
+fn part_two_valid_check(line: Vec<u64>, ascending: bool, allow_drop: bool) -> bool {
     let mut valid = true;
     // iterate over line by index
     for (i, _value) in line.iter().enumerate() {
@@ -57,24 +53,22 @@ fn part_two_valid_check(line: Vec<u64>, ascending: bool) -> bool {
             continue;
         }
         // if we've dropped a value, we need to compare the current value to the value before the dropped value
-        let deltas: Vec<i64> = match dropped_index {
-            Some(index) => {
-                if i == index + 1 {
-                    // go back to the value before the dropped value but also try the previous in case the one before was the bad one
-                    vec![line[i] as i64 - line[i - 2] as i64, line[i] as i64 - line[i - 1] as i64]
-                } else {
-                    vec![line[i] as i64 - line[i - 1] as i64]
-                }
-            }
-            None => vec![line[i] as i64 - line[i - 1] as i64],
-        };
-        if deltas.into_iter().all(|delta| ascending && (delta > 3 || delta < 1) || !ascending && (delta < -3 || delta > -1)) {
-            if dropped_index != None {
+        let delta = line[i] as i64 - line[i - 1] as i64;
+
+        if ascending && (delta > 3 || delta < 1) || !ascending && (delta < -3 || delta > -1) {
+            if allow_drop {
+                // try recursing to see if the list is valid without this value or the previous value
+                let mut line_clone_i = line.clone();
+                line_clone_i.remove(i);
+                let mut line_clone_i_minus_1 = line.clone();
+                line_clone_i_minus_1.remove(i - 1);
+                valid = part_two_valid_check(line_clone_i, ascending, false)
+                    || part_two_valid_check(line_clone_i_minus_1, ascending, false);
+                return valid;
+            } else {
                 valid = false;
-                // println!("already tried dropping index {:?} but failed again on index {:?},", dropped_index, i);
                 break;
             }
-            dropped_index = Some(i);
         }
     }
     valid
@@ -110,46 +104,46 @@ mod tests {
     #[test]
     fn test_part_two_remove_first() {
         let line = vec![6, 1, 3, 4];
-        assert_eq!(part_two_valid_check(line.clone(), true), true);
+        assert_eq!(part_two_valid_check(line.clone(), true, true), true);
     }
 
     #[test]
     fn test_part_two_valid_check() {
         let line = vec![1, 2, 3, 4];
-        assert_eq!(part_two_valid_check(line.clone(), true), true);
-        assert_eq!(part_two_valid_check(line.clone(), false), false);
+        assert_eq!(part_two_valid_check(line.clone(), true, true), true);
+        assert_eq!(part_two_valid_check(line.clone(), false, true), false);
 
         let line = vec![1, 1, 3, 4];
-        assert_eq!(part_two_valid_check(line.clone(), true), true);
-        assert_eq!(part_two_valid_check(line.clone(), false), false);
+        assert_eq!(part_two_valid_check(line.clone(), true, true), true);
+        assert_eq!(part_two_valid_check(line.clone(), false, true), false);
 
         let line = vec![2, 0, 4, 5, 6];
-        assert_eq!(part_two_valid_check(line.clone(), true), true);
-        assert_eq!(part_two_valid_check(line.clone(), false), false);
+        assert_eq!(part_two_valid_check(line.clone(), true, true), true);
+        assert_eq!(part_two_valid_check(line.clone(), false, true), false);
 
         // two issues fails
         let line = vec![1, 1, 3, 4, 4];
-        assert_eq!(part_two_valid_check(line.clone(), true), false);
-        assert_eq!(part_two_valid_check(line.clone(), false), false);
+        assert_eq!(part_two_valid_check(line.clone(), true, true), false);
+        assert_eq!(part_two_valid_check(line.clone(), false, true), false);
 
         let line = vec![1, 1, 1];
-        assert_eq!(part_two_valid_check(line.clone(), true), false);
-        assert_eq!(part_two_valid_check(line.clone(), false), false);
+        assert_eq!(part_two_valid_check(line.clone(), true, true), false);
+        assert_eq!(part_two_valid_check(line.clone(), false, true), false);
 
         let line = vec![1, 2, 4, 4];
-        assert_eq!(part_two_valid_check(line.clone(), true), true);
-        assert_eq!(part_two_valid_check(line.clone(), false), false);
+        assert_eq!(part_two_valid_check(line.clone(), true, true), true);
+        assert_eq!(part_two_valid_check(line.clone(), false, true), false);
 
         let line = vec![1, 4, 0, 5];
-        assert_eq!(part_two_valid_check(line.clone(), true), true);
-        assert_eq!(part_two_valid_check(line.clone(), false), false);
+        assert_eq!(part_two_valid_check(line.clone(), true, true), true);
+        assert_eq!(part_two_valid_check(line.clone(), false, true), false);
 
         let line = vec![4, 3, 2, 1];
-        assert_eq!(part_two_valid_check(line.clone(), true), false);
-        assert_eq!(part_two_valid_check(line.clone(), false), true);
+        assert_eq!(part_two_valid_check(line.clone(), true, true), false);
+        assert_eq!(part_two_valid_check(line.clone(), false, true), true);
 
         let line = vec![4, 3, 1, 1];
-        assert_eq!(part_two_valid_check(line.clone(), true), false);
-        assert_eq!(part_two_valid_check(line.clone(), false), true);
+        assert_eq!(part_two_valid_check(line.clone(), true, true), false);
+        assert_eq!(part_two_valid_check(line.clone(), false, true), true);
     }
 }
