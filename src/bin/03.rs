@@ -12,7 +12,7 @@ pub fn part_one(input: &str) -> Option<u64> {
 
 fn part_one_process_line(line: &str) -> u64 {
     // parse out the valid mul patterns
-    let re = Regex::new(r"mul\((\d{1,3}),(\d{1,3})\)").unwrap();
+    let re = Regex::new(r"(?s)mul\((\d{1,3}),(\d{1,3})\)").unwrap();
     re.captures_iter(line).map(|cap| {
         let a: u64 = cap[1].parse().unwrap();
         let b: u64 = cap[2].parse().unwrap();
@@ -21,16 +21,12 @@ fn part_one_process_line(line: &str) -> u64 {
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-    input.lines().map(|line| {
-        part_two_process_line(line)
-    }).reduce(|acc, x| acc + x).into()
+    part_two_process_line(input).into()
 }
 
 fn part_two_process_line(line: &str) -> u64 {
     // strip out any don't sections
-    dbg!(line);
-    let dont_re = Regex::new(r"don't\(\).*?(do\(\)|$)").unwrap();
-    dbg!(line);
+    let dont_re = Regex::new(r"(?s)don't\(\).*?(do\(\)|$)").unwrap();
     let line = dont_re.replace_all(line, "");
     part_one_process_line(&line)
 }
@@ -47,7 +43,7 @@ mod tests {
 
     #[test]
     fn test_part_two() {
-        let result = part_two("xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))");
+        let result = part_two("xmul(2,4)&mul[3,7]!^don't()\n_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))");
         assert_eq!(result, Some(48));
     }
 }
